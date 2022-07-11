@@ -191,7 +191,7 @@ Feel free to share loss porn, memes or any questions at:
 - [Reddit r/Superstonk - Gamestonk Terminal - We are very much alive](https://www.reddit.com/r/Superstonk/comments/o502i8/gamestonk_terminal_we_are_very_much_alive/)
 - [Medium- Gamestonk Terminal. Can't Stop, Won't Stop](https://dro-lopes.medium.com/gamestonk-terminal-cant-stop-won-t-stop-e635662d6f2e)
 - [Gamestonk Terminal: UX/UI >> Features](https://dro-lopes.medium.com/gamestonk-terminal-ux-features-f9754b484919)
-
+#mark
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
