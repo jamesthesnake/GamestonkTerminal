@@ -23,7 +23,10 @@ from openbb_terminal.helper_funcs import (
 from openbb_terminal.menu import session
 from openbb_terminal.parent_classes import StockBaseController
 from openbb_terminal.rich_config import console, MenuText
+from openbb_terminal.stocks.quantitative_analysis.beta_view import beta_view
 from openbb_terminal.stocks.quantitative_analysis.factors_view import capm_view
+
+# pylint: disable=C0302
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +57,7 @@ class QaController(StockBaseController):
         "goodness",
         "unitroot",
         "capm",
+        "beta",
         "var",
         "es",
         "sh",
@@ -146,6 +150,7 @@ class QaController(StockBaseController):
         mt.add_cmd("decompose")
         mt.add_cmd("cusum")
         mt.add_cmd("capm")
+        mt.add_cmd("beta")
         console.print(text=mt.menu_text, menu="Stocks - Quantitative Analysis")
 
     def custom_reset(self):
@@ -751,6 +756,34 @@ class QaController(StockBaseController):
             capm_view(self.ticker)
 
     @log_start_end(log=logger)
+    def call_beta(self, other_args: List[str]):
+        """Call the beta command on loaded ticker"""
+        parser = argparse.ArgumentParser(
+            add_help=False,
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+            prog="beta",
+            description="""
+                Displays a scatter plot demonstrating the beta of two stocks or ETFs.
+            """,
+        )
+        parser.add_argument(
+            "-r",
+            "--ref",
+            action="store",
+            dest="ref",
+            type=str,
+            default="SPY",
+            help="""
+                Reference ticker used for beta calculation.
+            """,
+        )
+        ns_parser = self.parse_known_args_and_warn(
+            parser, other_args, EXPORT_ONLY_RAW_DATA_ALLOWED
+        )
+        if ns_parser:
+            beta_view(self.ticker, ns_parser.ref, stock=self.stock)
+
+    @log_start_end(log=logger)
     def call_var(self, other_args: List[str]):
         """Process var command"""
         parser = argparse.ArgumentParser(
@@ -800,6 +833,18 @@ class QaController(StockBaseController):
                 Percentile used for VaR calculations, for example input 99.9 equals a 99.9 Percent VaR
             """,
         )
+        parser.add_argument(
+            "-d",
+            "--datarange",
+            action="store",
+            dest="data_range",
+            type=int,
+            default=0,
+            help="""
+                Number of rows you want to use VaR over,
+                ex: if you are using days, 30 would show VaR for the last 30 TRADING days
+            """,
+        )
         ns_parser = self.parse_known_args_and_warn(parser, other_args)
         if ns_parser:
             if ns_parser.adjusted and ns_parser.student_t:
@@ -812,6 +857,7 @@ class QaController(StockBaseController):
                     ns_parser.adjusted,
                     ns_parser.student_t,
                     ns_parser.percentile / 100,
+                    ns_parser.data_range,
                     False,
                 )
 
