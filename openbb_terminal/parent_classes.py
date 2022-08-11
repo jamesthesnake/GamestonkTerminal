@@ -34,7 +34,8 @@ from openbb_terminal.helper_funcs import (
     support_message,
     check_file_type_saved,
     check_positive,
-    get_preferred_source,
+    get_ordered_list_sources,
+    parse_and_split_input,
 )
 from openbb_terminal.config_terminal import theme
 from openbb_terminal.rich_config import console
@@ -101,7 +102,11 @@ class BaseController(metaclass=ABCMeta):
         self.check_path()
         self.path = [x for x in self.PATH.split("/") if x != ""]
 
-        self.queue = queue if (queue and self.PATH != "/") else list()
+        self.queue = (
+            self.parse_input(an_input="/".join(queue))
+            if (queue and self.PATH != "/")
+            else list()
+        )
 
         controller_choices = self.CHOICES_COMMANDS + self.CHOICES_MENUS
         if controller_choices:
@@ -158,6 +163,19 @@ class BaseController(metaclass=ABCMeta):
         """Checks for an existing instance of the controller before creating a new one"""
         self.save_class()
         arguments = len(args) + len(kwargs)
+        # Due to the 'arguments == 1' condition, we actually NEVER load a class
+        # that has arguments (The 1 argument corresponds to self.queue)
+        # Advantage: If the user changes something on one controller and then goes to the
+        # controller below, it will create such class from scratch bringing all new variables
+        # in and considering latest changes.
+        # Disadvantage: If the user goes on a controller below and we have been there before
+        # it will not load that previous class, but create a new one from scratch.
+        # SCENARIO: If the user is in stocks and does load AAPL/ta the TA menu will get AAPL,
+        # and if then the user goes back to the stocks menu using .. that menu will have AAPL
+        # Now, if "arguments == 1" condition exists, if the user does "load TSLA" and then
+        # goes into "TA", the "TSLA" ticker will appear. If that condition doesn't exist
+        # the previous class will be loaded and even if the user changes the ticker on
+        # the stocks context it will not impact the one of TA menu - unless changes are done.
         if class_ins.PATH in controllers and arguments == 1 and obbff.REMEMBER_CONTEXTS:
             old_class = controllers[class_ins.PATH]
             old_class.queue = self.queue
@@ -176,6 +194,34 @@ class BaseController(metaclass=ABCMeta):
     @abstractmethod
     def print_help(self) -> None:
         raise NotImplementedError("Must override print_help.")
+
+    def parse_input(self, an_input: str) -> List:
+        """Parse controller input
+
+        Splits the command chain from user input into a list of individual commands
+        while respecting the forward slash in the command arguments.
+
+        In the default scenario only unix-like paths are handles by the parser.
+        Override this function in the controller classes that inherit from this one to
+        resolve edge cases specific to command arguments on those controllers.
+
+        When handling edge cases add additional regular expressions to the list.
+
+        Parameters
+        ----------
+        an_input : str
+            User input string
+
+        Returns
+        -------
+        List
+            Command queue as list
+        """
+        custom_filters: List = []
+        commands = parse_and_split_input(
+            an_input=an_input, custom_filters=custom_filters
+        )
+        return commands
 
     def contains_keys(self, string_to_check: str) -> bool:
         if self.KEYS_MENU in string_to_check or self.KEYS_MENU in self.PATH:
@@ -214,15 +260,14 @@ class BaseController(metaclass=ABCMeta):
         List[str]
             List of commands in the queue to execute
         """
+        actions = self.parse_input(an_input)
 
         # Empty command
-        if not an_input:
+        if len(actions) == 0:
             pass
-        #    console.print("")
 
         # Navigation slash is being used first split commands
-        elif "/" in an_input:
-            actions = an_input.split("/")
+        elif len(actions) > 1:
 
             # Absolute path is specified
             if not actions[0]:
@@ -322,6 +367,7 @@ class BaseController(metaclass=ABCMeta):
     def call_exit(self, _) -> None:
         # Not sure how to handle controller loading here
         """Process exit terminal command"""
+        self.save_class()
         console.print("")
         for _ in range(self.PATH.count("/")):
             self.queue.insert(0, "quit")
@@ -331,6 +377,7 @@ class BaseController(metaclass=ABCMeta):
         """Process reset command. If you would like to have customization in the
         reset process define a method `custom_reset` in the child class.
         """
+        self.save_class()
         if self.PATH != "/":
             if self.custom_reset():
                 self.queue = self.custom_reset() + self.queue
@@ -422,7 +469,6 @@ class BaseController(metaclass=ABCMeta):
         export_allowed: int = NO_EXPORT,
         raw: bool = False,
         limit: int = 0,
-        sources: List[str] = None,
     ):
         """Parses list of arguments into the supplied parser
 
@@ -439,8 +485,6 @@ class BaseController(metaclass=ABCMeta):
             Add the --raw flag
         limit: int
             Add a --limit flag with this number default
-        sources: List[str]
-            Data sources from where to select from
 
         Returns
         -------
@@ -489,13 +533,14 @@ class BaseController(metaclass=ABCMeta):
                 help="Number of entries to show in data.",
                 type=check_positive,
             )
+        sources = get_ordered_list_sources(f"{self.PATH}{parser.prog}")
         if sources:
             parser.add_argument(
                 "--source",
                 action="store",
                 dest="source",
                 choices=sources,
-                default=get_preferred_source(f"{self.PATH}{parser.prog}"),
+                default=sources[0],  # the first source from the list is the default
                 help="Data source to select from",
             )
 
@@ -741,7 +786,7 @@ class StockBaseController(BaseController, metaclass=ABCMeta):
             "-r",
             "--iexrange",
             dest="iexrange",
-            help="Range for using the iexcloud api.  Note that longer range requires more tokens in account",
+            help="Range for using the iexcloud api.  Longer range requires more tokens in account",
             choices=["ytd", "1y", "2y", "5y", "6m"],
             type=str,
             default="ytd",
@@ -750,7 +795,8 @@ class StockBaseController(BaseController, metaclass=ABCMeta):
             other_args.insert(0, "-t")
 
         ns_parser = self.parse_known_args_and_warn(
-            parser, other_args, sources=["yf", "av", "iex", "polygon"]
+            parser,
+            other_args,
         )
 
         if ns_parser:
@@ -772,8 +818,8 @@ class StockBaseController(BaseController, metaclass=ABCMeta):
                 )
             else:
                 # This seems to block the .exe since the folder needs to be manually created
-                # This block basically makes sure that we only look for the file if the -f flag is used
-                # If we add files in the argparse choices, it will fail for the .exe even if no -f is used
+                # This block makes sure that we only look for the file if the -f flag is used
+                # Adding files in the argparse choices, will fail for the .exe even without -f
                 try:
                     if ns_parser.filepath not in os.listdir(
                         os.path.join("custom_imports", "stocks")

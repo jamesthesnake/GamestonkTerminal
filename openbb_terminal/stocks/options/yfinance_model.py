@@ -1,6 +1,7 @@
 """Yfinance options model"""
 __docformat__ = "numpy"
 
+import warnings
 import logging
 from datetime import datetime
 from typing import Any, Dict, List, Tuple
@@ -8,10 +9,106 @@ from typing import Any, Dict, List, Tuple
 import pandas as pd
 import yfinance as yf
 
+from openbb_terminal.stocks.options.op_helpers import Option
 from openbb_terminal.decorators import log_start_end
 from openbb_terminal.rich_config import console
 
 logger = logging.getLogger(__name__)
+
+
+# pylint: disable=W0640
+@log_start_end(log=logger)
+def get_full_option_chain(
+    ticker: str, expiration: str, calls: bool = True, puts: bool = True
+) -> pd.DataFrame:
+    """Get full option chains with calculated greeks
+
+    Parameters
+    ----------
+    ticker: str
+        Stock ticker
+    expiration: str
+        Expiration date for chain in format YYY-mm-dd
+    calls: bool
+        Flag to get calls
+    puts: bool
+        Flag to get puts
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame of option chain.  If both calls and puts
+    """
+    try:
+        yf_ticker = yf.Ticker(ticker)
+        options = yf_ticker.option_chain(expiration)
+    except ValueError:
+        console.print(f"[red]{ticker} options for {expiration} not found.[/red]")
+        return pd.DataFrame()
+
+    last_price = yf_ticker.info["regularMarketPrice"]
+
+    # Columns we want to get
+    yf_option_cols = [
+        "strike",
+        "lastPrice",
+        "bid",
+        "ask",
+        "volume",
+        "openInterest",
+        "impliedVolatility",
+    ]
+    # Get call and put dataframes if the booleans are true
+    put_df = options.puts[yf_option_cols].copy() if puts else pd.DataFrame()
+    call_df = options.calls[yf_option_cols].copy() if calls else pd.DataFrame()
+    # so that the loop below doesn't break if only one call/put is supplied
+    df_list, option_factor = [], []
+    if puts:
+        df_list.append(put_df)
+        option_factor.append(-1)
+    if calls:
+        df_list.append(call_df)
+        option_factor.append(1)
+    df_list = [x[x["impliedVolatility"] > 0] for x in df_list]
+    # Add in greeks to each df
+    # Time to expiration:
+    dt = (datetime.strptime(expiration, "%Y-%m-%d") - datetime.now()).seconds / (
+        60 * 60 * 24
+    )
+    # Note the way the Option class is defined, put has a -1 input and call has a +1 input
+    for df, option_type in zip(df_list, option_factor):
+        df["Delta"] = df.apply(
+            lambda x: Option(
+                last_price, x.strike, 0.03, 0, dt, x.impliedVolatility, option_type
+            ).Delta(),
+            axis=1,
+        )
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            df["Gamma"] = df.apply(
+                lambda x: Option(
+                    last_price, x.strike, 0.03, 0, dt, x.impliedVolatility, option_type
+                ).Gamma(),
+                axis=1,
+            )
+            df["Theta"] = df.apply(
+                lambda x: Option(
+                    last_price, x.strike, 0.03, 0, dt, x.impliedVolatility, option_type
+                ).Theta(),
+                axis=1,
+            )
+    if len(df_list) == 1:
+        options_df = df_list[0]
+    if len(df_list) == 2:
+        options_df = pd.merge(
+            left=df_list[1],
+            right=df_list[0],
+            on="strike",
+            how="outer",
+            suffixes=["_call", "_put"],
+        )
+
+    return options_df
 
 
 @log_start_end(log=logger)
