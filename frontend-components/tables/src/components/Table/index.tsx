@@ -11,15 +11,23 @@ import clsx from "clsx";
 import { useMemo, useRef, useState } from "react";
 import { useVirtual } from "react-virtual";
 import Select from "../Select";
-import { formatNumberMagnitude, fuzzyFilter, isEqual } from "../../utils/utils";
+import {
+  formatNumberMagnitude,
+  fuzzyFilter,
+  isEqual,
+  includesDateNames,
+} from "../../utils/utils";
 import DraggableColumnHeader from "./ColumnHeader";
-import Pagination from "./Pagination";
+import Pagination, { validatePageSize } from "./Pagination";
 import Export from "./Export";
 import Timestamp from "./Timestamp";
 import FilterColumns from "./FilterColumns";
 import xss from "xss";
 import useLocalStorage from "../../utils/useLocalStorage";
 import Toast from "../Toast";
+import useDarkMode from "../../utils/useDarkMode";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import CloseIcon from "../Icons/Close";
 
 const date = new Date();
 
@@ -31,25 +39,29 @@ function getCellWidth(row, column) {
     const indexLabel = row.hasOwnProperty("index")
       ? "index"
       : row.hasOwnProperty("Index")
-      ? "Index"
-      : null;
+        ? "Index"
+        : null;
     const indexValue = indexLabel ? row[indexLabel] : null;
     const value = row[column];
     const valueType = typeof value;
+    const only_numbers = value?.toString().replace(/[^0-9]/g, "");
+
     const probablyDate =
-      column.toLowerCase().includes("date") ||
-      column.toLowerCase() === "index" ||
-      (indexValue &&
-        typeof indexValue == "string" &&
-        (indexValue.toLowerCase().includes("date") ||
-          indexValue.toLowerCase().includes("day") ||
-          indexValue.toLowerCase().includes("time") ||
-          indexValue.toLowerCase().includes("timestamp") ||
-          indexValue.toLowerCase().includes("year") ||
-          indexValue.toLowerCase().includes("month") ||
-          indexValue.toLowerCase().includes("week") ||
-          indexValue.toLowerCase().includes("hour") ||
-          indexValue.toLowerCase().includes("minute")));
+      only_numbers.length >= 4 &&
+      (includesDateNames(column) ||
+        column.toLowerCase() === "index" ||
+        (indexValue &&
+          indexValue &&
+          typeof indexValue == "string" &&
+          (indexValue.toLowerCase().includes("date") ||
+            indexValue.toLowerCase().includes("day") ||
+            indexValue.toLowerCase().includes("time") ||
+            indexValue.toLowerCase().includes("timestamp") ||
+            indexValue.toLowerCase().includes("year") ||
+            indexValue.toLowerCase().includes("month") ||
+            indexValue.toLowerCase().includes("week") ||
+            indexValue.toLowerCase().includes("hour") ||
+            indexValue.toLowerCase().includes("minute"))));
 
     const probablyLink = valueType === "string" && value.startsWith("http");
     if (probablyLink) {
@@ -92,13 +104,41 @@ function getCellWidth(row, column) {
   }
 }
 
-export default function Table({ data, columns, title, source = "" }: any) {
+export const EXPORT_TYPES = ["csv", "xlsx", "png"];
+export default function Table({
+  data,
+  columns,
+  title,
+  initialTheme,
+  cmd = "",
+}: {
+  data: any[];
+  columns: any[];
+  title: string;
+  initialTheme: "light" | "dark";
+  cmd?: string;
+}) {
+  const [type, setType] = useLocalStorage("exportType", EXPORT_TYPES[0]);
+  const [colorTheme, setTheme] = useDarkMode(initialTheme);
+  const [darkMode, setDarkMode] = useState(
+    colorTheme === "dark" ? true : false
+  );
+  const toggleDarkMode = (checked: boolean) => {
+    setTheme(colorTheme);
+    setDarkMode(checked);
+  };
+
+  const [currentPage, setCurrentPage] = useLocalStorage(
+    "rowsPerPage",
+    DEFAULT_ROWS_PER_PAGE,
+    validatePageSize
+  );
   const [advanced, setAdvanced] = useLocalStorage("advanced", false);
   const [colors, setColors] = useLocalStorage("colors", false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [fontSize, setFontSize] = useLocalStorage("fontSize", "1");
-  const [open, setOpen] = useState(columns.length > MAX_COLUMNS);
+  const [open, setOpen] = useState(false);
   const defaultVisibleColumns = columns.reduce((acc, cur, idx) => {
     acc[cur] = idx < MAX_COLUMNS ? true : false;
     return acc;
@@ -108,7 +148,7 @@ export default function Table({ data, columns, title, source = "" }: any) {
   );
 
   const getColumnWidth = (rows, accessor, headerText) => {
-    const maxWidth = 400;
+    const maxWidth = 200;
     const magicSpacing = 12;
     const cellLength = Math.max(
       ...rows.map((row) => getCellWidth(row, accessor)),
@@ -129,25 +169,22 @@ export default function Table({ data, columns, title, source = "" }: any) {
           const indexLabel = row.original.hasOwnProperty("index")
             ? "index"
             : row.original.hasOwnProperty("Index")
-            ? "Index"
-            : null;
+              ? "Index"
+              : columns[0];
           const indexValue = indexLabel ? row.original[indexLabel] : null;
           const value = row.original[column];
           const valueType = typeof value;
+          const only_numbers = value?.toString().replace(/[^0-9]/g, "");
           const probablyDate =
-            column.toLowerCase().includes("date") ||
-            column.toLowerCase() === "index" ||
-            (indexValue &&
-              typeof indexValue == "string" &&
-              (indexValue.toLowerCase().includes("date") ||
-                indexValue.toLowerCase().includes("day") ||
-                indexValue.toLowerCase().includes("time") ||
-                indexValue.toLowerCase().includes("timestamp") ||
-                indexValue.toLowerCase().includes("year") ||
-                indexValue.toLowerCase().includes("month") ||
-                indexValue.toLowerCase().includes("week") ||
-                indexValue.toLowerCase().includes("hour") ||
-                indexValue.toLowerCase().includes("minute")));
+            only_numbers.length >= 4 &&
+            (includesDateNames(column) ||
+              column.toLowerCase() === "index" ||
+              (indexValue &&
+                typeof indexValue == "string" &&
+                (indexValue.toLowerCase().includes("date") ||
+                  indexValue.toLowerCase().includes("time") ||
+                  indexValue.toLowerCase().includes("timestamp") ||
+                  indexValue.toLowerCase().includes("year"))));
 
           const probablyLink =
             valueType === "string" && value.startsWith("http");
@@ -160,13 +197,28 @@ export default function Table({ data, columns, title, source = "" }: any) {
                 target="_blank"
                 rel="noreferrer"
               >
-                {value}
+                {value.length > 25 ? value.substring(0, 25) + "..." : value}
               </a>
             );
           }
           if (probablyDate) {
             if (typeof value === "string") {
-              return <p>{value}</p>;
+              const date = value.split("T")[0];
+              const time = value.split("T")[1]?.split(".")[0];
+              if (time === "00:00:00") {
+                return <p>{date}</p>;
+              }
+              return (
+                <p>
+                  {date} {time}
+                </p>
+              );
+            }
+
+            if (typeof value === "number") {
+              if (value < 1000000000000) {
+                return <p>{value}</p>;
+              }
             }
 
             try {
@@ -197,7 +249,7 @@ export default function Table({ data, columns, title, source = "" }: any) {
             return (
               <p
                 className={clsx("whitespace-nowrap", {
-                  "text-white": !colors,
+                  "text-black dark:text-white": !colors,
                   "text-[#16A34A]": value > 0 && colors,
                   "text-[#F87171]": value < 0 && colors,
                   "text-[#404040]": value === 0 && colors,
@@ -219,6 +271,8 @@ export default function Table({ data, columns, title, source = "" }: any) {
     ],
     [advanced, colors]
   );
+
+  const [lockFirstColumn, setLockFirstColumn] = useState(false);
 
   const [columnOrder, setColumnOrder] = useState(
     rtColumns.map((column) => column.id as string)
@@ -255,34 +309,18 @@ export default function Table({ data, columns, title, source = "" }: any) {
     initialState: {
       pagination: {
         pageIndex: 0,
-        pageSize: DEFAULT_ROWS_PER_PAGE,
+        pageSize:
+          typeof currentPage === "string"
+            ? currentPage.includes("All")
+              ? data.length
+              : parseInt(currentPage)
+            : currentPage,
       },
     },
   });
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const { rows } = table.getRowModel();
-
-  // virtualization is making a visual bug where the rows keep switching the colors, disabling it for now
-
-  /*const rowVirtualizer = useVirtual({
-    parentRef: tableContainerRef,
-    size: rows.length,
-    overscan: 10,
-  });
-
- const { virtualItems: virtualRows, totalSize } = rowVirtualizer;
-
- const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0;
-  const paddingBottom =
-    virtualRows.length > 0
-      ? totalSize - (virtualRows?.[virtualRows.length - 1]?.end || 0)
-      : 0;
-*/
-
-  // also disabling generating a chart for now, will come back to it later
-  //const [dialog, setDialog] = useState(null);
-
   const visibleColumns = table.getVisibleFlatColumns();
 
   return (
@@ -298,116 +336,19 @@ export default function Table({ data, columns, title, source = "" }: any) {
         open={open}
         setOpen={setOpen}
       />
-
-      {/*dialog && (
-        <>
-          <div
-            onClick={() => setDialog(null)}
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-filter backdrop-blur-sm"
-          />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-grey-500">
-            <Chart values={dialog.values} />
-          </div>
-        </>
-      )*/}
       <div
         ref={tableContainerRef}
         className={clsx("overflow-x-hidden h-screen")}
       >
-        <div className="bg-grey-900/70 backdrop-filter backdrop-blur flex gap-2 px-6 items-center justify-between pt-4 ">
-          <div className="flex gap-10 items-center">
-            <div className="flex gap-[14px]">
-              <input
-                id="advanced"
-                type="checkbox"
-                checked={advanced}
-                onChange={() => setAdvanced(!advanced)}
-              />
-              <label htmlFor="advanced">Advanced</label>
-            </div>
-            {advanced && (
-              <div className="flex gap-[14px]">
-                <input
-                  id="colors"
-                  type="checkbox"
-                  checked={colors}
-                  onChange={() => setColors(!colors)}
-                />
-                <label htmlFor="colors">Colors</label>
-              </div>
-            )}
-            {/*advanced && (
-              <DebouncedInput
-                id="search"
-                value={globalFilter ?? ""}
-                onChange={(value) => setGlobalFilter(String(value))}
-                placeholder="Search..."
-              />
-            )*/}
-          </div>
-
-          {advanced && (
-            <div className="flex gap-10 items-end">
-              {needsReorder && (
-                <button onClick={() => resetOrder()} className="_btn h-9">
-                  Reset Order
-                </button>
-              )}
-              <Select
-                labelType="row"
-                value={fontSize}
-                onChange={setFontSize}
-                label="Font size"
-                placeholder="Select font size"
-                groups={[
-                  {
-                    label: "Font size",
-                    items: [
-                      {
-                        label: "50%",
-                        value: "0.5",
-                      },
-                      {
-                        label: "75%",
-                        value: "0.75",
-                      },
-                      {
-                        label: "100%",
-                        value: "1",
-                      },
-                      {
-                        label: "125%",
-                        value: "1.25",
-                      },
-                      {
-                        label: "150%",
-                        value: "1.5",
-                      },
-                      {
-                        label: "175%",
-                        value: "1.75",
-                      },
-                      {
-                        label: "200%",
-                        value: "2",
-                      },
-                    ],
-                  },
-                ]}
-              />
-              <FilterColumns table={table} label="Filter" />
-            </div>
-          )}
-        </div>
-        <div className="relative p-6 mb-20" id="table">
+        <div className="relative p-4" id="table">
           <div className="absolute -inset-0.5 bg-gradient-to-r rounded-md blur-md from-[#072e49]/30 via-[#0d345f]/30 to-[#0d3362]/30"></div>
           <div
             className={
-              "border border-grey-200/60 bg-grey-900 rounded overflow-hidden relative z-20"
+              "border border-grey-500/60 dark:border-grey-200/60 bg-white dark:bg-grey-900 rounded overflow-hidden relative z-20"
             }
           >
             <div
-              className="_header gap-4 py-2 text-center text-xs flex items-center justify-between px-4"
+              className="_header relative gap-4 py-2 text-center text-xs flex items-center justify-between px-4 text-white"
               style={{
                 fontSize: `${Number(fontSize) * 100}%`,
               }}
@@ -426,13 +367,11 @@ export default function Table({ data, columns, title, source = "" }: any) {
                   ></path>
                 </svg>
               </div>
-              <p className="font-bold w-1/3">
+              <p className="font-bold w-1/3 flex flex-col gap-0.5 items-center">
                 {title}
-                {source && (
-                  <span className="font-normal text-xs">
-                    {` [Data from ${source}]`}
-                  </span>
-                )}
+                {/* {source && (
+                  <span className="font-normal text-[10px]">{`[${source}]`}</span>
+                )} */}
               </p>
               <p className="w-1/3 text-right text-xs">
                 {new Intl.DateTimeFormat("en-GB", {
@@ -441,27 +380,31 @@ export default function Table({ data, columns, title, source = "" }: any) {
                 })
                   .format(date)
                   .replace(/:\d\d /, " ")}
+                <br />
+                <span className="text-grey-400">{cmd}</span>
               </p>
+              {/* {source && typeof source === "string" && source.includes("*") && (
+                <p className="text-[8px] absolute bottom-0 right-4">
+                  *not affiliated
+                </p>
+              )} */}
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-auto max-h-[calc(100vh-160px)] smh:max-h-[calc(100vh-95px)]">
               <table
-                className="text-sm"
+                className="text-sm relative"
                 style={{
                   fontSize: `${Number(fontSize) * 100}%`,
                 }}
-                /*style={{
-        width: table.getCenterTotalSize(),
-      }}*/
               >
-                <thead>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <tr
-                      key={headerGroup.id}
-                      className={clsx("!h-10 text-left")}
-                    >
-                      {headerGroup.headers.map((header) => {
+                <thead className="sticky top-0 bg-white dark:bg-grey-900">
+                  {table.getHeaderGroups().map((headerGroup, idx) => (
+                    <tr key={headerGroup.id}>
+                      {headerGroup.headers.map((header, idx2) => {
                         return (
                           <DraggableColumnHeader
+                            setLockFirstColumn={setLockFirstColumn}
+                            lockFirstColumn={lockFirstColumn}
+                            idx={idx2}
                             advanced={advanced}
                             key={header.id}
                             header={header}
@@ -473,27 +416,24 @@ export default function Table({ data, columns, title, source = "" }: any) {
                   ))}
                 </thead>
                 <tbody>
-                  {/*paddingTop > 0 && (
-                    <tr>
-                      <td style={{ height: `${paddingTop}px` }}></td>
-                    </tr>
-                  )*/}
                   {table.getRowModel().rows.map((row, idx) => {
-                    //const row = rows[virtualRow.index];
                     return (
                       <tr
                         key={row.id}
                         className="!h-[64px] border-b border-grey-400"
                       >
-                        {row.getVisibleCells().map((cell) => {
+                        {row.getVisibleCells().map((cell, idx2) => {
                           return (
                             <td
                               key={cell.id}
                               className={clsx(
-                                "whitespace-nowrap overflow-auto p-4",
+                                "whitespace-normal p-4 text-black dark:text-white",
                                 {
-                                  "bg-grey-850": idx % 2 === 0,
-                                  "bg-[#202020]": idx % 2 === 1,
+                                  "bg-white dark:bg-grey-850": idx % 2 === 0,
+                                  "bg-grey-100 dark:bg-[#202020]":
+                                    idx % 2 === 1,
+                                  "sticky left-0 z-10":
+                                    idx2 === 0 && lockFirstColumn,
                                 }
                               )}
                               style={{
@@ -510,11 +450,6 @@ export default function Table({ data, columns, title, source = "" }: any) {
                       </tr>
                     );
                   })}
-                  {/*paddingBottom > 0 && (
-                    <tr>
-                      <td style={{ height: `${paddingBottom}px` }} />
-                    </tr>
-                  )*/}
                 </tbody>
                 {rows.length > 30 && visibleColumns.length > 4 && (
                   <tfoot>
@@ -524,14 +459,17 @@ export default function Table({ data, columns, title, source = "" }: any) {
                           <th
                             key={header.id}
                             colSpan={header.colSpan}
-                            className="text-grey-500 bg-grey-850 font-normal text-left text-sm h-10"
+                            className="text-grey-500 bg-grey-100 dark:bg-grey-850 font-normal text-left text-sm h-10 p-4"
+                            style={{
+                              width: header.getSize(),
+                            }}
                           >
                             {header.isPlaceholder
                               ? null
                               : flexRender(
-                                  header.column.columnDef.footer,
-                                  header.getContext()
-                                )}
+                                header.column.columnDef.footer,
+                                header.getContext()
+                              )}
                           </th>
                         ))}
                       </tr>
@@ -542,70 +480,161 @@ export default function Table({ data, columns, title, source = "" }: any) {
             </div>
           </div>
         </div>
-        <div className="fixed bg-grey-900/70 backdrop-filter backdrop-blur z-20 bottom-0 left-0 w-full flex gap-10 justify-between py-4 px-6">
-          <Export columns={columns} data={data} />
+        <div className="smh:hidden flex max-h-[68px] overflow-x-auto bg-white/70 dark:bg-grey-900/70 backdrop-filter backdrop-blur z-20 bottom-0 left-0 w-full gap-10 justify-between py-4 px-4 text-sm">
           <div className="flex items-center gap-10">
-            <Pagination table={table} />
-            <Timestamp />
+            <DialogPrimitive.Root>
+              <DialogPrimitive.Trigger className="_btn">
+                Settings
+              </DialogPrimitive.Trigger>
+              <DialogPrimitive.Portal>
+                <DialogPrimitive.Overlay className="_modal-overlay" />
+                <DialogPrimitive.Content className="_modal">
+                  <DialogPrimitive.Close className="absolute top-[40px] right-[46px] text-grey-200 hover:text-white rounded-[4px] focus:outline focus:outline-2 focus:outline-grey-500">
+                    <CloseIcon className="w-6 h-6" />
+                  </DialogPrimitive.Close>
+                  <DialogPrimitive.Title className="uppercase font-bold tracking-widest">
+                    Settings
+                  </DialogPrimitive.Title>
+                  <div className="grid grid-cols-2 gap-4 mt-10 text-sm">
+                    {needsReorder && (
+                      <button onClick={() => resetOrder()} className="_btn h-9">
+                        Reset Order
+                      </button>
+                    )}
+                    <Select
+                      labelType="row"
+                      value={!darkMode ? "dark" : "light"}
+                      onChange={(value) => {
+                        toggleDarkMode(value !== "dark");
+                      }}
+                      label="Theme"
+                      placeholder="Select theme"
+                      groups={[
+                        {
+                          label: "Theme",
+                          items: [
+                            {
+                              label: "Dark",
+                              value: "dark",
+                            },
+                            {
+                              label: "Light",
+                              value: "light",
+                            },
+                          ],
+                        },
+                      ]}
+                    />
+                    <Select
+                      labelType="row"
+                      value={type}
+                      onChange={(value) => {
+                        setType(value);
+                      }}
+                      label="Export type"
+                      placeholder="Select export type"
+                      groups={[
+                        {
+                          label: "Export type",
+                          items: EXPORT_TYPES.map((type) => ({
+                            label: type,
+                            value: type,
+                          })),
+                        },
+                      ]}
+                    />
+                    <Select
+                      labelType="row"
+                      value={fontSize}
+                      onChange={setFontSize}
+                      label="Font size"
+                      placeholder="Select font size"
+                      groups={[
+                        {
+                          label: "Font size",
+                          items: [
+                            {
+                              label: "50%",
+                              value: "0.5",
+                            },
+                            {
+                              label: "75%",
+                              value: "0.75",
+                            },
+                            {
+                              label: "100%",
+                              value: "1",
+                            },
+                            {
+                              label: "125%",
+                              value: "1.25",
+                            },
+                            {
+                              label: "150%",
+                              value: "1.5",
+                            },
+                            {
+                              label: "175%",
+                              value: "1.75",
+                            },
+                            {
+                              label: "200%",
+                              value: "2",
+                            },
+                          ],
+                        },
+                      ]}
+                    />
+                    <FilterColumns table={table} label="Filter" />
+                    <div className="flex gap-2 items-center">
+                      <Select
+                        labelType="row"
+                        value={advanced ? "advanced" : "simple"}
+                        onChange={(value) => {
+                          setAdvanced(value === "advanced");
+                        }}
+                        label="Type"
+                        placeholder="Select type"
+                        groups={[
+                          {
+                            label: "Type",
+                            items: [
+                              {
+                                label: "Simple",
+                                value: "simple",
+                              },
+                              {
+                                label: "Advanced",
+                                value: "advanced",
+                              },
+                            ],
+                          },
+                        ]}
+                      />
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <label htmlFor="colors">Colors</label>
+                      <input
+                        id="colors"
+                        type="checkbox"
+                        checked={colors}
+                        onChange={() => setColors(!colors)}
+                      />
+                    </div>
+                  </div>
+                </DialogPrimitive.Content>
+              </DialogPrimitive.Portal>
+            </DialogPrimitive.Root>
+            <FilterColumns onlyIconTrigger table={table} label="" />
           </div>
-          {/*
-          <button
-            className="_btn"
-            onClick={() => {
-              const selectedRows = table.getSelectedRowModel().flatRows;
-              const values = selectedRows.map((row) =>
-                Object.values(row.original)
-              );
-              setDialog({
-                values,
-              });
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"
-              />
-            </svg>
-            Generate chart
-          </button>*/}
+          <Pagination
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            table={table}
+          />
+          <Export setType={setType} type={type} columns={columns} data={data} />
         </div>
       </div>
     </>
   );
 }
-
-/* {
-              id: "select",
-              size: 1,
-              disableSortBy: true,
-              header: ({ table }) => (
-                <IndeterminateCheckbox
-                  {...{
-                    checked: table.getIsAllRowsSelected(),
-                    indeterminate: table.getIsSomeRowsSelected(),
-                    onChange: table.getToggleAllRowsSelectedHandler(),
-                  }}
-                />
-              ),
-              cell: ({ row }) => (
-                <div className="px-1">
-                  <IndeterminateCheckbox
-                    {...{
-                      checked: row.getIsSelected(),
-                      disabled: !row.getCanSelect(),
-                      indeterminate: row.getIsSomeSelected(),
-                      onChange: row.getToggleSelectedHandler(),
-                    }}
-                  />
-                </div>
-              ),
-            },*/

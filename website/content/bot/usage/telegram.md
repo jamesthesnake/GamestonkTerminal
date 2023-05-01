@@ -1,15 +1,27 @@
 ---
 title: Telegram
-sidebar_position: 2
-description: TBD
-keywords: [telegram, how to, explanation, openbb bot, openbb, guide, bot guide]
+sidebar_position: 3
+description: Understand the basics for getting started and running the OpenBB Boton Telegram.
+keywords: [telegram, how to, explanation, openbb bot, openbb, guide, bot guide, commands, community]
 ---
+
+import HeadTitle from '@site/src/components/General/HeadTitle.tsx';
+
+<HeadTitle title="Telegram - Bot | OpenBB Docs" />
 
 ## Getting Started with Telegram
 
 Now that you have added the bot to your Telegram server you can get started with running commands.
 
 To use it, you need to type slash commands in the chat. A slash command starts with a / followed by a keyword and an optional argument. For example, ```/cd AAPL``` will show you the daily chart for Apple stock.
+
+<div className="flex justify-center h-full w-[800px] rounded-r-[4px]">
+  <img
+    className="h-full object-cover"
+    alt="gif describing step"
+    src="https://openbb-assets.s3.amazonaws.com/docs/bot_docs/telegram-gif.gif"
+  />
+</div>
 
 <details><summary>How do I select commands instead of typing?</summary>
 If you are On mobile press and hold to select the command.

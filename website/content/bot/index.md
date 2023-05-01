@@ -6,6 +6,7 @@ keywords:
     openbb,
     discord,
     telegram,
+    slack,
     beginner guide,
     how to use openbb bot,
     introduction,
@@ -49,7 +50,7 @@ To know more about OpenBB Bot, you can start by reading the [Installation Guide]
 
 ### Using OpenBB Bot
 
-To learn how to use OpenBB Bot, you can start by reading the [Basics Guide](/bot/usage/discord).
+To learn how to use OpenBB Bot, you can start by reading the [Basics Guide](/bot/guides/discord).
 
 ### Bot Reference
 

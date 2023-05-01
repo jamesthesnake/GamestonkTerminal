@@ -3,11 +3,15 @@
 # IMPORTATION THIRDPARTY
 import pytest
 
-# IMPORTATION INTERNAL
-from openbb_terminal.core.session.current_user import (
+from openbb_terminal.core.models.user_model import (
+    CredentialsModel,
     PreferencesModel,
-    copy_user,
+    ProfileModel,
+    SourcesModel,
+    UserModel,
 )
+
+# IMPORTATION INTERNAL
 from openbb_terminal.keys_controller import KeysController
 
 controller = KeysController(menu_usage=False)
@@ -16,20 +20,20 @@ controller = KeysController(menu_usage=False)
 
 
 @pytest.fixture(autouse=True)
-def revert_current_user(mocker):
+def mock(mocker):
     mocker.patch(
         target="openbb_terminal.keys_model.set_credential",
     )
-    preferences = PreferencesModel(
-        ENABLE_CHECK_API=False,
-    )
-    mock_current_user = copy_user(preferences=preferences)
+    mocker.patch("openbb_terminal.keys_model.write_to_dotenv")
     mocker.patch(
-        target="openbb_terminal.core.session.current_user.__current_user",
-        new=mock_current_user,
+        target="openbb_terminal.keys_model.get_current_user",
+        return_value=UserModel(
+            profile=ProfileModel(),
+            credentials=CredentialsModel(),
+            preferences=PreferencesModel(),
+            sources=SourcesModel(),
+        ),
     )
-
-    yield
 
 
 class MockCFG:
@@ -44,7 +48,6 @@ class MockCFG:
         self.API_TRADIER_TOKEN = kwargs.get("TRADIER", None)
         self.API_CMC_KEY = kwargs.get("CMC", None)
         self.API_FINNHUB_KEY = kwargs.get("FINNHUB", None)
-        self.API_IEX_TOKEN = kwargs.get("IEX", None)
         self.API_REDDIT_CLIENT_ID = kwargs.get("REDDIT_CLIENT", None)
         self.API_REDDIT_CLIENT_SECRET = kwargs.get("REDDIT_SECRET", None)
         self.API_REDDIT_USERNAME = kwargs.get("REDDIT_USERNAME", None)
@@ -61,7 +64,6 @@ class MockCFG:
         self.API_BINANCE_KEY = kwargs.get("BINANCE", None)
         self.API_BINANCE_SECRET = kwargs.get("BINANCE", None)
         self.API_BITQUERY_KEY = kwargs.get("BITQUERY", None)
-        self.API_SENTIMENTINVESTOR_TOKEN = kwargs.get("SI", None)
         self.API_COINBASE_KEY = kwargs.get("COINBASE", None)
         self.API_COINBASE_SECRET = kwargs.get("COINBASE", None)
         self.API_COINBASE_PASS_PHRASE = kwargs.get("COINBASE", None)

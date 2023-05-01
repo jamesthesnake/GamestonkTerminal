@@ -1,31 +1,40 @@
 ---
 title: Stocks
-keywords: [stocks, fundamental analysis, analysis, Behavioural, strategy, comparison, due diligence, discovery, dark pool, short, data, forecasting, fundamental, quantitative, government, forecasting, ml, ai, machine learning, artificial intelligence, insider, trading, research, sector, industry, technical, trading hours, quote, market data, close, adjusted close, download, export, tools, openbb terminal]
-description: The Stocks menu is the high-level menu for the Public Equity asset class. It contains functions for searching and loading company market data, showing candle charts, quotes and company specifics via a large selection of sub-menus. The sub-menus break the functions down into groups based on the type of data they return. They are listed below with a short description. Refer to each sub-menu's introductory guide for a more detailed explanation of the functions within.
+keywords: [stocks, fundamental analysis, analysis, Behavioural, strategy, comparison, due diligence, discovery, dark pool, short, data, forecasting, fundamental, quantitative, government, forecasting, ml, ai, machine learning, artificial intelligence, insider, trading, research, sector, industry, technical, trading hours, quote, market data, close, adjusted close, download, export, tools, openbb terminal, how to, example]
+description: Introduction to the Stocks menu. It is the high-level menu for the Public Equity asset class. It contains functions for searching and loading company market data, showing candle charts, quotes and company specifics via a large selection of sub-menus.
 ---
+The Stocks menu is the high-level menu for the Public Equity asset class. It contains functions for searching and loading company market data, showing candle charts, quotes and company specifics via a large selection of sub-menus. The sub-menus break the functions down into groups based on the type of data they return. The items in the stocks menu are listed below with a short description. Refer to each sub-menu's introductory guide for a more detailed explanation of the functions within.
 
-The Stocks menu is the high-level menu for the Public Equity asset class. It contains functions for searching and loading company market data, showing candle charts, quotes and company specifics via a large selection of sub-menus. The sub-menus break the functions down into groups based on the type of data they return. They are listed below with a short description. Refer to each sub-menu's introductory guide for a more detailed explanation of the functions within.
+## Menu Contents
 
-|Command  |Sub-Menu |Description |
-|:---------|------------:|----------------------:|
-|ba |Behavioural Analysis |Social Media, Sentiment, Trends |
-|bt |Strategy Backtester | Simple EMA, EMA Crossover & RSI Strategies |
-|ca |Comparison Analysis |Compare Historical Prices, Correlations, Financials |
-|disc |Discovery |Upcoming Earnings and Dividends Calendar, Heatmaps, Trending News |
-|dps |Dark Pool and Short Data |Short Interest, Borrow Rates, Off-Exchange Short Volume |
-|fa |Fundamental Analysis |Financial Statements, Company Overviews, Analyst Coverage, Price Targets |
-|forecast |Forecasting and ML |Enter the Forecast Menu With the Loaded Ticker |
-|gov |Government |House and Senate Trading Disclosures, Lobbying Efforts, US Treasury Spending |
-|ins |Insider Trading |SEC Form 4 Disclosures & Screener |
-|options |Equity Options |Options Analysis, Quotes, Historical Prices, Greeks & Screener |
-|qa |Quantitative Analysis |Mathematical Analysis |
-|res |Research Websites |Shortcuts to Online Resources for the Loaded Ticker |
-|scr |Stocks Screener |Custom Stocks Screener |
-|sia |Sector & Industry Analysis |Find and Compare by Region, Sector, Industry & Market Cap |
-|ta |Technical Analysis |Technical Indicators and Charts |
-|th |Trading Hours |Lists of World Markets and Current Status |
+| Command  | Type     |                     Name |                                                                  Description |
+| :------- | -------- | -----------------------: | ---------------------------------------------------------------------------: |
+| ba       | Sub-Menu |     Behavioural Analysis |                                              Social Media, Sentiment, Trends |
+| bt       | Sub-Menu |      Strategy Backtester |                                   Simple EMA, EMA Crossover & RSI Strategies |
+| ca       | Sub-Menu |      Comparison Analysis |                          Compare Historical Prices, Correlations, Financials |
+| candle   | Function |                   Candle |                                         Candlestick Chart of the Loaded Data |
+| codes    | Function |                    Codes |                                   Cross-Reference FIGI, CIK, and SIC Numbers |
+| disc     | Sub-Menu |                Discovery |            Upcoming Earnings and Dividends Calendar, Heatmaps, Trending News |
+| dps      | Sub-Menu | Dark Pool and Short Data |                      Short Interest, Borrow Rates, Off-Exchange Short Volume |
+| fa       | Sub-Menu |     Fundamental Analysis |     Financial Statements, Company Overviews, Analyst Coverage, Price Targets |
+| forecast | Sub-Menu |       Forecasting and ML |                               Enter the Forecast Menu With the Loaded Ticker |
+| gov      | Sub-Menu |               Government | House and Senate Trading Disclosures, Lobbying Efforts, US Treasury Spending |
+| ins      | Sub-Menu |          Insider Trading |                                            SEC Form 4 Disclosures & Screener |
+| load     | Function |                     Load |                                                         Load a Ticker Symbol |
+| news     | Function |                     News |                                               Ticker-Specific News Headlines |
+| options  | Sub-Menu |           Equity Options |               Options Analysis, Quotes, Historical Prices, Greeks & Screener |
+| qa       | Sub-Menu |    Quantitative Analysis |                                                        Mathematical Analysis |
+| quote    | Function |                    Quote |                            Current Price and Performance Data for the Ticker |
+| res      | Sub-Menu |        Research Websites |                          Shortcuts to Online Resources for the Loaded Ticker |
+| scr      | Sub-Menu |          Stocks Screener |                                                       Custom Stocks Screener |
+| search   | Function |            Stocks Search |                                                    Find a company and ticker |
+| ta       | Sub-Menu |       Technical Analysis |                                              Technical Indicators and Charts |
+| th       | Sub-Menu |            Trading Hours |                                    Lists of World Markets and Current Status |
+| tob      | Function |              Top of Book |                Top of Book Bid/Ask from CBOE (US-only when markets are open) |
 
 ## How to Use
+
+Navigate to the menu by entering, `stocks`, from the Main Menu. From another menu, `/stocks`, will jump directly there.
 
 The current screen can always be re-printed with any of: `?`, `h`, `help`. The help dialogue, containing all parameters for each function, is printed when `-h` is attached to any command. The help dialogue will also provide the list of sources available to each command, the `news` function is shown below.
 
@@ -36,12 +45,11 @@ news -h
 Which prints the reference information on the screen:
 
 ```console
-usage: news [-t TICKER] [-d N_START_DATE] [-o] [-s SOURCES] [-h] [--export EXPORT] [--sheet-name SHEET_NAME [SHEET_NAME ...]] [-l LIMIT]
-            [--source {Feedparser,NewsApi}]
+usage: news [-t TICKER] [-d N_START_DATE] [-o] [-s SOURCES] [-h] [--export EXPORT] [--sheet-name SHEET_NAME [SHEET_NAME ...]] [-l LIMIT] [--source {Feedparser,NewsApi,Ultima}]
 
 latest news of the company
 
-optional arguments:
+options:
   -t TICKER, --ticker TICKER
                         Ticker to get data for
   -d N_START_DATE, --date N_START_DATE
@@ -55,23 +63,35 @@ optional arguments:
                         Name of excel sheet to save data to. Only valid for .xlsx files.
   -l LIMIT, --limit LIMIT
                         Number of entries to show in data.
-  --source {Feedparser,NewsApi}
+  --source {Feedparser,NewsApi,Ultima}
                         Data source to select from
 
 For more information and examples, use 'about news' to access the related guide.
 ```
 
-The first step in many workflows will be to load a stock symbol with historical data. The amount, granularity, and market coverage will vary by source. Users can elect to subscribe to any of the data sources accordingly. While no API keys are required to get started using the Terminal, acquiring these credentials at the free level will enhance the user experience with additional functionality. Refer to the [API keys guide](https://docs.openbb.co/terminal/quickstart/api-keys) for links to obtain each.
-
-<img width="800" alt="image" src="https://user-images.githubusercontent.com/46355364/218974442-563cb216-623f-4f98-b2e1-9f1bb0e1a199.png"></img>
-
-Attaching the source argument to a command enables users to select their preferred source. The default sources can be changed from the [`/sources` menu](https://docs.openbb.co/terminal/usage/guides/changing-sources). To select the `source` as `NewsApi`, use the block below.
+Attaching the source argument to a command selects a source other than the default, which can also be set permanently from the [`/sources` menu](https://docs.openbb.co/terminal/usage/guides/changing-sources). To select the `source` as `Ultima`, use the syntax below.
 
 ```console
-news --source NewsApi
+news -t WMT --source Ultima
+
+------------------------
+> 2023-04-10 15:44:56 - The Federal Trade Commission and Justice Department should stop the acquisition of Albertsons by Kroger. The usual false claims are being made such as...
+
+Relevancy score: 4.87/5 Stars
+
+Competition Risk (Walmart Inc. faces competition risk due to the presence of other large retailers in the market, as well as physical, eCommerce and omni-channel retailers, social commerce platforms, wholesale club operators and retail intermediaries. 
+These competitors have the ability to leverage their economies of scale to offer lower prices than Walmart, which can put pressure on Walmart’s margins. 
+Additionally, these competitors have the ability to quickly respond to changes in the market, which can put Walmart at a disadvantage.
+Furthermore, Walmart is subject to laws and regulations related to competition and antitrust matters, which could require extensive system and operational changes, increase operating costs, and require significant capital expenditures.)
+
+Read more: https://www.cincinnati.com/story/opinion/letters/2023/04/10/letters-kroger-acquiring-albertsons-will-reduce-competition-not-prices/70080423007/
 ```
 
+The first step in many workflows will be to load a stock symbol with historical data. The amount, granularity, and market coverage will vary by source. Users can elect to subscribe to any of the data sources accordingly. While no API keys are required to get started using the Terminal, acquiring these credentials at the free level significantly enhances the user experience with additional functionality and available data. Refer to the [API keys guide](https://docs.openbb.co/terminal/usage/guides/api-keys) for links to obtain each.
+
 ## Examples
+
+### Load
 
 The `load` function is a starting point for most functions, and parameters can be adjusted for intraday and resolution. It has many optional arguments which can be displayed for reference by attaching, `-h`, or, `--help`, to any function. Entering:
 
@@ -79,14 +99,11 @@ The `load` function is a starting point for most functions, and parameters can b
 load -h
 ```
 
-Prints the dialogue on the screen:
+Reveals the choices:
 
 ```console
 usage: load [-t TICKER] [-s START] [-e END] [-i {1,5,15,30,60}] [-p] [-f FILEPATH] [-m] [-w] [--exchange] [--performance] [-h] [--export EXPORT]
             [--sheet-name SHEET_NAME [SHEET_NAME ...]] [--source {YahooFinance,AlphaVantage,Polygon,EODHD,Intrinio}]
-
-Load stock ticker to perform analysis on. When the data source is yf, an Indian ticker can be loaded by using '.NS' at the end, e.g. 'SBIN.NS'. See available market
-in https://help.yahoo.com/kb/exchanges-data-providers-yahoo-finance-sln2310.html.
 
 optional arguments:
   -t TICKER, --ticker TICKER
@@ -96,7 +113,7 @@ optional arguments:
   -e END, --end END     The ending date (format YYYY-MM-DD) of the stock (default: 2023-02-15)
   -i {1,5,15,30,60}, --interval {1,5,15,30,60}
                         Intraday stock minutes (default: 1440)
-  -p, --prepost         Pre/After market hours. Only reflected in 'YahooFinance' intraday data. (default: False)
+  -p, --prepost         Pre/After market hours. Only reflected in intraday data. (default: False)
   -f FILEPATH, --file FILEPATH
                         Path to load custom file. (default: None)
   -m, --monthly         Load monthly data (default: False)
@@ -107,13 +124,13 @@ optional arguments:
   --export EXPORT       Export raw data into csv, json, xlsx (default: )
   --sheet-name SHEET_NAME [SHEET_NAME ...]
                         Name of excel sheet to save data to. Only valid for .xlsx files. (default: None)
-  --source {YahooFinance,AlphaVantage,Polygon,EODHD,Intrinio}
+  --source {YahooFinance,AlphaVantage,Polygon,EODHD,Intrinio,DataBento}
                         Data source to select from (default: YahooFinance)
 
-For more information and examples, use 'about load' to access the related guide.
+
 ```
 
-By default, a daily period, with three-years of OHLC+V data, from YahooFinance, is loaded to memory. Use the default settings like this:
+By default, a daily period of OHLC+V data over three years, from YahooFinance, is loaded to memory. Use the default settings like this:
 
 ```console
 load MSFT
@@ -155,19 +172,19 @@ Intraday data is also requested this way, only using the `-i` or `--interval` ar
 load MSFT -i 1
 ```
 
-The performance table will not be displayed with intraday data, and we can see that five-days of one-minute candles are available from YahooFinance.
+From YahooFinance, five days of one-minute data is available.  The amount of historical price data will vary by source.
 
 ```console
 Loading Intraday 1min data for MSFT with starting period 2022-11-25.
 ```
 
-This can be augmented further by adding pre/post market price candles. The `-p` flag is only applicable to YahooFinance, Polygon will automatically include the candles from 4AM-8PM US/Eastern when intraday is selected.
+This can be augmented further by adding pre/post market price candles.
 
 ```console
 load MSFT -i 1 -p
 ```
 
-Data can also be exported directly from the `load` function as a CSV, JSON, or XLSX file. The file is created in the OpenBBUserData folder.
+Data can also be exported, as a CSV, JSON, or XLSX file, directly from the `load` function. The file is created in the OpenBBUserData folder.
 
 ```console
 load MSFT -s 1990-01-01 -m --export msft_monthly.csv
@@ -188,12 +205,12 @@ The `candle` command displays a chart of the loaded symbol. It needs no argument
 ```console
 (🦋) /stocks/ $ load MSFT
 
-cLoading Daily data for MSFT with starting period 2020-02-11.
+Loading Daily data for MSFT with starting period 2020-04-08.
 
 (🦋) /stocks/ $ candle
 ```
 
-![candle](https://user-images.githubusercontent.com/46355364/218981911-90d38930-a621-43cc-873a-1c55db842e95.png)
+![stocks/candle](https://user-images.githubusercontent.com/85772166/231903835-a0157626-1329-4d5a-80a1-8d21b71adcb1.png)
 
 The help dialogue for the `candle` command shows how this chart can be supplemented with additional data; specifically, `-t` for trend, `--ma` for moving averages, and `--log` for a log scale.
 
@@ -204,22 +221,21 @@ candle -h
 Which prints to screen:
 
 ```console
-usage: candle [-t TICKER] [-p] [--sort {adjclose,open,close,high,low,volume,returns,logret}] [-r] [--raw] [--trend] [--ma MOV_AVG] [--log] [-h] [--export EXPORT] [--sheet-name SHEET_NAME [SHEET_NAME ...]] [-l LIMIT]
+usage: candle [-t TICKER] [-p] [--sort {open,high,low,close,adjclose,volume,dividends,stock_splits}] [-r] [--raw] [--trend] [--ma MOV_AVG] [--log] [-h] [--export EXPORT]
+              [--sheet-name SHEET_NAME [SHEET_NAME ...]] [-l LIMIT]
 
 Shows historic data for a stock
 
-optional arguments:
+options:
   -t TICKER, --ticker TICKER
                         Ticker to analyze (default: None)
-  -p, --plotly          Flag to show interactive plotly chart (default: True)
-  --sort {adjclose,open,close,high,low,volume,returns,logret}
+  -p, --prepost         Pre/After market hours. Only works for 'yf' source, and intraday data (default: False)
+  --sort {open,high,low,close,adjclose,volume,dividends,stock_splits}
                         Choose a column to sort by. Only works when raw data is displayed. (default: )
-  -r, --reverse         Data is sorted in descending order by default. Reverse flag will sort it in an ascending way. Only works when raw data is displayed.
-                        (default: False)
+  -r, --reverse         Data is sorted in descending order by default. Reverse flag will sort it in an ascending way. Only works when raw data is displayed. (default: False)
   --raw                 Shows raw data instead of chart. (default: False)
   --trend               Flag to add high and low trends to candle (default: False)
-  --ma MOV_AVG          Add moving average in number of days to plot and separate by a comma. Value for ma (moving average) keyword needs to be greater than 1.
-                        (default: None)
+  --ma MOV_AVG          Add moving average in number of days to plot and separate by a comma. Value for ma (moving average) keyword needs to be greater than 1. (default: None)
   --log                 Plot with y axis on log scale (default: False)
   -h, --help            show this help message (default: False)
   --export EXPORT       Export raw data into csv, json, xlsx and figure into png, jpg, pdf, svg (default: )
@@ -231,13 +247,16 @@ optional arguments:
 For more information and examples, use 'about candle' to access the related guide.
 ```
 
-Be sure to adjust the values for moving averages to correspond with the interval of the data loaded. Below adds movings averages for one and four year periods (because data loaded is monthly), and changes the y-axis to a log-scale.
+Be sure to adjust the values for moving averages to correspond with the interval of the data loaded. Below adds movings averages for three and twelve month periods (because data loaded is monthly), and changes the y-axis to a log-scale.
 
 ```console
-candle --ma 20,30 --log
+load msft --start 1980-01-01 --monthly
+candle --ma 3,12 --log
 ```
 
-![candle moving average log](https://user-images.githubusercontent.com/46355364/218982220-411e780a-aa8d-436e-b2db-3c95a981b6eb.png)
+![candle moving average log](https://user-images.githubusercontent.com/85772166/231904022-7da40eae-2389-4dfa-a619-f950fa8f2929.png)
+
+### News
 
 Get ticker-related news headlines by entering `news` after loading a ticker.
 
@@ -245,45 +264,9 @@ Get ticker-related news headlines by entering `news` after loading a ticker.
 news --source NewsApi
 ```
 
-The output will look like:
+![stocks/news](https://user-images.githubusercontent.com/85772166/231904057-235b93e2-12e6-45db-a4eb-f6c7c93e02ff.png)
 
-```console
-(🦋) /stocks/ $ news --source NewsApi
-
-346 news articles for Tesla,+Inc. were found since 2023-02-08
-
-                                         Elon Musk says he may lead Twitter for almost another year
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Content                                                                                                                                   ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ 2023-02-15 07:57:55                                                                                                                       │
-├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ The billionaire executive embarked on a search for a new CEO for Twitter in December, a person familiar with the search said at the time. │
-├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ https://www.moneycontrol.com/news/world/elon-musk-says-he-may-lead-twitter-for-almost-another-year-10088481.html                          │
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-                                                   Elon Musk Gave $1.9 Billion of Tesla Shares to Charity Last Year
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Content                                                                                                                                                            ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ 2023-02-15 06:46:08                                                                                                                                                │
-├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Tesla CEO Elon Musk now owns around 13% of the company. Elon Musk donated roughly $1.9 billion of Tesla Inc. stock to charity last year, according to a regulatory │
-│ filing made Tuesday. Mr. Musk, Tesla’s chief executive, reported having donated roughly 11.6 mil…                                                                  │
-├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ https://biztoc.com/x/99aa746544171bae                                                                                                                              │
-└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-                           Elon Musk Aims to Find Twitter CEO Successor Toward End of 2023
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Content                                                                                                           ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ 2023-02-15 06:14:49                                                                                               │
-├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Elon Musk is aiming to find his successor to lead Twitter Inc. as chief executive officer toward the end of 2023. │
-├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ https://www.bloomberg.com/news/articles/2023-02-15/musk-aims-to-replace-himself-as-twitter-ceo-toward-end-of-2023 │
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-```
+### TOB
 
 The `tob` function is the "Top of Book", and it returns data during market hours.
 
@@ -291,217 +274,36 @@ The `tob` function is the "Top of Book", and it returns data during market hours
 tob
 ```
 
-Which displays an output like:
+![stocks/tob](https://user-images.githubusercontent.com/85772166/231904101-0df25e0e-631c-4a58-a449-e851df6fd4d8.png)
 
-```console
-                SPY Top of Book
-┏━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━┓
-┃ Bid Size ┃ Bid Price ┃ Ask Price ┃ Ask Size ┃
-┡━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━┩
-│ 223.00   │ 407.60    │ 407.62    │ 536.00   │
-├──────────┼───────────┼───────────┼──────────┤
-│ 823.00   │ 407.59    │ 407.63    │ 436.00   │
-├──────────┼───────────┼───────────┼──────────┤
-│ 923.00   │ 407.58    │ 407.64    │ 836.00   │
-├──────────┼───────────┼───────────┼──────────┤
-│ 316.00   │ 407.57    │ 407.65    │ 936.00   │
-├──────────┼───────────┼───────────┼──────────┤
-│ 823.00   │ 407.56    │ 407.66    │ 636.00   │
-└──────────┴───────────┴───────────┴──────────┘
-```
+### Quote
 
-Get the current market price, during exchange hours.
+Get the current market price and general performance metrics of the loaded ticker.
 
 ```console
 quote
 ```
 
-Displays a table:
+![stocks/quote](https://user-images.githubusercontent.com/85772166/231904179-1908801d-ac8d-4bc2-aa08-e93507df1630.png)
 
-```console
-(🦋) /stocks/ $ quote
-
-                  TSLA Quote
-┏━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┓
-┃                       ┃                     ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━┩
-│ Symbol                │ TSLA                │
-├───────────────────────┼─────────────────────┤
-│ Name                  │ Tesla, Inc.         │
-├───────────────────────┼─────────────────────┤
-│ Price                 │ 209.25              │
-├───────────────────────┼─────────────────────┤
-│ Changes percentage    │ 7.51                │
-├───────────────────────┼─────────────────────┤
-│ Change                │ 14.61               │
-├───────────────────────┼─────────────────────┤
-│ Day low               │ 189.45              │
-├───────────────────────┼─────────────────────┤
-│ Day high              │ 209.82              │
-├───────────────────────┼─────────────────────┤
-│ Year high             │ 384.29              │
-├───────────────────────┼─────────────────────┤
-│ Year low              │ 101.81              │
-├───────────────────────┼─────────────────────┤
-│ Market cap            │ 662.088 B           │
-├───────────────────────┼─────────────────────┤
-│ Price avg50           │ 152.95              │
-├───────────────────────┼─────────────────────┤
-│ Price avg200          │ 225.47              │
-├───────────────────────┼─────────────────────┤
-│ Exchange              │ NASDAQ              │
-├───────────────────────┼─────────────────────┤
-│ Volume                │ 214.769 M           │
-├───────────────────────┼─────────────────────┤
-│ Avg volume            │ 156755621           │
-├───────────────────────┼─────────────────────┤
-│ Open                  │ 191.94              │
-├───────────────────────┼─────────────────────┤
-│ Previous close        │ 194.64              │
-├───────────────────────┼─────────────────────┤
-│ Eps                   │ 3.44                │
-├───────────────────────┼─────────────────────┤
-│ Pe                    │ 60.83               │
-├───────────────────────┼─────────────────────┤
-│ Earnings announcement │ 2023-04-18 10:59:00 │
-├───────────────────────┼─────────────────────┤
-│ Shares outstanding    │ 3.164 B             │
-├───────────────────────┼─────────────────────┤
-│ Timestamp             │ 1676408405          │
-└───────────────────────┴─────────────────────┘
-```
+### Codes
 
 `codes` prints the CIK, Composite FIGI, Share Class FIGI, and SIC codes - when available - for a US-listed stock. This function requires a free API key from Polygon.
 
 ```console
-load aapl/codes
+codes
 ```
 
-Prints the output:
+![stocks/codes](https://user-images.githubusercontent.com/85772166/231904217-b477d719-389c-4678-ac04-266641ec7652.png)
+
+### Search
+
+The `search` function provides a way to find stocks by name, region, sector, industry and exchange location. The results can be exported as a CSV, JSON, or XLSX file from the command line or within the table.
+
+Return all Canadian banks with US listings with:
 
 ```console
-            AAPL Codes
-┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
-┃                  ┃              ┃
-┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
-│ CIK              │ 0000320193   │
-├──────────────────┼──────────────┤
-│ COMPOSITE FIGI   │ BBG000B9XRY4 │
-├──────────────────┼──────────────┤
-│ SHARE CLASS FIGI │ BBG001S5N8V8 │
-├──────────────────┼──────────────┤
-│ SIC CODE         │ 3571         │
-└──────────────────┴──────────────┘
+search --country canada --industrygroup banks
 ```
 
-The `search` function provides a way to find stocks by name, region, sector, industry and exchange location. The results can be easily exported as a CSV, JSON, or XLSX file.
-
-```console
-search -h
-```
-
-Prints the help dialogue for the command:
-
-```console
-usage: search [-q QUERY [QUERY ...]] [-c country] [-s sector] [-i industry] [-e exchange] [-a] [-h] [--export EXPORT] [--sheet-name SHEET_NAME [SHEET_NAME ...]] [-l LIMIT]
-
-Show companies matching the search query, country, sector, industry and/or exchange. Note that by default only the United States exchanges are searched which tend
-to contain the most extensive data for each company. To search all exchanges use the --all-exchanges flag.
-
-optional arguments:
-  -q QUERY [QUERY ...], --query QUERY [QUERY ...]
-                        The search term used to find company tickers (default: )
-  -c country, --country country
-                        Search by country to find stocks matching the criteria (default: )
-  -s sector, --sector sector
-                        Search by sector to find stocks matching the criteria (default: )
-  -i industry, --industry industry
-                        Search by industry to find stocks matching the criteria (default: )
-  -e exchange, --exchange exchange
-                        Search by a specific exchange country to find stocks matching the criteria (default: )
-  -a, --all-exchanges   Whether to search all exchanges, without this option only the United States market is searched. (default: False)
-  -h, --help            show this help message (default: False)
-  --export EXPORT       Export raw data into csv, json, xlsx (default: )
-  --sheet-name SHEET_NAME [SHEET_NAME ...]
-                        Name of excel sheet to save data to. Only valid for .xlsx files. (default: None)
-  -l LIMIT, --limit LIMIT
-                        Number of entries to show in data. (default: 10)
-
-For more information and examples, use 'about search' to access the related guide.
-```
-
-As an example, if you wish to obtain the ticker for Apple, you can do so with the following:
-
-```
-(🦋) /stocks/ $ search -q apple
-
-                                              Companies found on term apple
-┏━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┓
-┃      ┃ Name                                ┃ Country       ┃ Sector             ┃ Industry                  ┃ Exchange ┃
-┡━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━┩
-│ AAPL │ Apple Inc.                          │ United States │ Technology         │ Consumer Electronics      │ NMS      │
-├──────┼─────────────────────────────────────┼───────────────┼────────────────────┼───────────────────────────┼──────────┤
-│ AGPL │ Apple Green Holding, Inc.           │ Canada        │ Technology         │ Software - Application    │ PNK      │
-├──────┼─────────────────────────────────────┼───────────────┼────────────────────┼───────────────────────────┼──────────┤
-│ APLE │ Apple Hospitality REIT, Inc.        │ United States │ Real Estate        │ REIT - Hotel & Motel      │ NYQ      │
-├──────┼─────────────────────────────────────┼───────────────┼────────────────────┼───────────────────────────┼──────────┤
-│ APRU │ Apple Rush Company, Inc.            │ United States │ Consumer Defensive │ Beverages - Non-Alcoholic │ PNK      │
-├──────┼─────────────────────────────────────┼───────────────┼────────────────────┼───────────────────────────┼──────────┤
-│ GAPJ │ Golden Apple Oil & Gas Inc.         │ United States │                    │                           │ PNK      │
-├──────┼─────────────────────────────────────┼───────────────┼────────────────────┼───────────────────────────┼──────────┤
-│ MLP  │ Maui Land & Pineapple Company, Inc. │ United States │ Real Estate        │ Real Estate Services      │ NYQ      │
-├──────┼─────────────────────────────────────┼───────────────┼────────────────────┼───────────────────────────┼──────────┤
-│ PNPL │ Pineapple, Inc.                     │ United States │ Healthcare         │ Pharmaceutical Retailers  │ PNK      │
-└──────┴─────────────────────────────────────┴───────────────┴────────────────────┴───────────────────────────┴──────────┘
-```
-
-With a variety of options to also discover country-specific and sector-specific companies:
-
-```
-(🦋) /stocks/ $ search --sector technology --country united_kingdom -l 20
-
-                                  Companies found in United Kingdom within Technology
-┏━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┓
-┃       ┃ Name                          ┃ Country        ┃ Sector     ┃ Industry                            ┃ Exchange ┃
-┡━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━┩
-│ ATC   │ Atotech Limited               │ United Kingdom │ Technology │ Electronic Components               │ NYQ      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ MIME  │ Mimecast Limited              │ United Kingdom │ Technology │ Software - Infrastructure           │ NMS      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ NNOCF │ Nanoco Group plc              │ United Kingdom │ Technology │ Semiconductor Equipment & Materials │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ OXINF │ Oxford Instruments plc        │ United Kingdom │ Technology │ Semiconductor Equipment & Materials │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ PSFE  │ Paysafe Limited               │ United Kingdom │ Technology │ Information Technology Services     │ NYQ      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ PXAMF │ Location Sciences Group PLC   │ United Kingdom │ Technology │ Software - Application              │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ RNSHF │ Renishaw plc                  │ United Kingdom │ Technology │ Scientific & Technical Instruments  │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ MFGP  │ Micro Focus International plc │ United Kingdom │ Technology │ Software - Infrastructure           │ NYQ      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ SEPJF │ Spectris plc                  │ United Kingdom │ Technology │ Scientific & Technical Instruments  │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ SLLN  │ Searchlight Solutions Ltd.    │ United Kingdom │ Technology │ Information Technology Services     │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ SPMYY │ Spirent Communications plc    │ United Kingdom │ Technology │ Software - Infrastructure           │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ SPNUF │ Spirent Communications plc    │ United Kingdom │ Technology │ Software - Infrastructure           │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ TEKCF │ Tekcapital plc                │ United Kingdom │ Technology │ Software - Application              │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ TTCNF │ Telit Communications PLC      │ United Kingdom │ Technology │ Communication Equipment             │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ TTGPF │ TT Electronics plc            │ United Kingdom │ Technology │ Electronic Components               │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ SGPYY │ The Sage Group plc            │ United Kingdom │ Technology │ Software - Application              │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ VVPR  │ VivoPower International PLC   │ United Kingdom │ Technology │ Solar                               │ NMS      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ MCFUF │ Micro Focus International plc │ United Kingdom │ Technology │ Software - Infrastructure           │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ KNNNF │ Kainos Group plc              │ United Kingdom │ Technology │ Software - Application              │ PNK      │
-├───────┼───────────────────────────────┼────────────────┼────────────┼─────────────────────────────────────┼──────────┤
-│ AVEVF │ AVEVA Group plc               │ United Kingdom │ Technology │ Software - Application              │ PNK      │
-└───────┴───────────────────────────────┴────────────────┴────────────┴─────────────────────────────────────┴──────────┘
-```
+![stocks/search](https://user-images.githubusercontent.com/85772166/231904274-cc3ba608-280a-47f7-834a-98ba2f3de6c3.png)

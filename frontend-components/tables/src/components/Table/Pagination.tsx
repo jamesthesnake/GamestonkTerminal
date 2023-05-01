@@ -1,24 +1,40 @@
 import clsx from "clsx";
-import { useState } from "react";
-import { DEFAULT_ROWS_PER_PAGE } from ".";
-import useLocalStorage from "../../utils/useLocalStorage";
 import Select from "../Select";
+import { DEFAULT_ROWS_PER_PAGE } from ".";
 
-export default function Pagination({ table }: { table: any }) {
-  const [currentPage, setCurrentPage] = useLocalStorage(
-    "rowsPerPage",
-    DEFAULT_ROWS_PER_PAGE
-  );
+export function validatePageSize(pageSize: any) {
+  if (typeof pageSize !== "number") {
+    if (typeof pageSize === "string" && pageSize.includes("All")) {
+      return pageSize;
+    }
+    return DEFAULT_ROWS_PER_PAGE;
+  }
+  if (pageSize < 1) {
+    return DEFAULT_ROWS_PER_PAGE;
+  }
+  return pageSize;
+}
+
+export default function Pagination({
+  table,
+  currentPage,
+  setCurrentPage,
+}: {
+  table: any;
+  currentPage: number;
+  setCurrentPage: (value: number) => void;
+}) {
   const totalRows = table.getFilteredRowModel().rows.length;
 
   return (
-    <div className="flex items-center gap-8">
+    <div className="hidden md:flex items-center gap-8">
       <Select
         value={currentPage}
         onChange={(value) => {
-          setCurrentPage(value);
-          if (value === `All (${totalRows})`) table.setPageSize(totalRows);
-          else table.setPageSize(value);
+          const newValue = validatePageSize(value);
+          setCurrentPage(newValue);
+          if (newValue.toString().includes("All")) table.setPageSize(totalRows);
+          else table.setPageSize(newValue);
         }}
         labelType="row"
         label="Rows per page"
@@ -52,11 +68,11 @@ export default function Pagination({ table }: { table: any }) {
             className="_input"
           />
           </span>*/}
-      <div>
+      <div className="hidden lg:block">
         <button
           className={clsx("px-2", {
-            "text-grey-700": !table.getCanPreviousPage(),
-            "text-white": table.getCanPreviousPage(),
+            "text-grey-400 dark:text-grey-700": !table.getCanPreviousPage(),
+            "dark:text-white": table.getCanPreviousPage(),
           })}
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
@@ -65,8 +81,8 @@ export default function Pagination({ table }: { table: any }) {
         </button>
         <button
           className={clsx("px-2", {
-            "text-grey-700": !table.getCanPreviousPage(),
-            "text-white": table.getCanPreviousPage(),
+            "text-grey-400 dark:text-grey-700": !table.getCanPreviousPage(),
+            "dark:text-white": table.getCanPreviousPage(),
           })}
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
@@ -75,8 +91,8 @@ export default function Pagination({ table }: { table: any }) {
         </button>
         <button
           className={clsx("px-2", {
-            "text-grey-700": !table.getCanNextPage(),
-            "text-white": table.getCanNextPage(),
+            "text-grey-400 dark:text-grey-700": !table.getCanNextPage(),
+            "dark:text-white": table.getCanNextPage(),
           })}
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
@@ -85,8 +101,8 @@ export default function Pagination({ table }: { table: any }) {
         </button>
         <button
           className={clsx("px-2", {
-            "text-grey-700": !table.getCanNextPage(),
-            "text-white": table.getCanNextPage(),
+            "text-grey-400 dark:text-grey-700": !table.getCanNextPage(),
+            "dark:text-white": table.getCanNextPage(),
           })}
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}

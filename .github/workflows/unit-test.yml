@@ -3,7 +3,6 @@ name: Unit Test
 env:
   OPENBB_ENABLE_QUICK_EXIT: true
   OPENBB_LOG_COLLECT: false
-  OPENBB_USE_ION: false
   OPENBB_USE_PROMPT_TOOLKIT: false
   OPENBB_FILE_OVERWRITE: true
   OPENBB_ENABLE_CHECK_API: false
@@ -76,7 +75,7 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: 1.3.2
+          version: 1.4.0
           virtualenvs-create: true
           virtualenvs-in-project: true
 
@@ -138,7 +137,7 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: 1.3.2
+          version: 1.4.0
           virtualenvs-create: true
           virtualenvs-in-project: true
 
@@ -204,7 +203,7 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: 1.3.2
+          version: 1.4.0
           virtualenvs-create: true
           virtualenvs-in-project: true
 

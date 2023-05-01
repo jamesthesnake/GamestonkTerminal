@@ -17,8 +17,20 @@ keywords:
     how to,
     explanation,
     openbb terminal,
+    pypi,
+    c++,
+    miniconda,
+    library,
+    arm,
+    library,
+    error,
+    raspberry pi,
   ]
 ---
+
+import HeadTitle from '@site/src/components/General/HeadTitle.tsx';
+
+<HeadTitle title="Installation and Updates - Terminal | OpenBB Docs" />
 
 ## Installation and Updates
 
@@ -88,5 +100,15 @@ brew install cmake
 <details><summary>Miniconda3 will not install on ARM/Linux Raspberry Pi machines.</summary>
 
 Refer to this issue on the Conda [GitHub](https://github.com/conda/conda/issues/10723) page.
+
+</details>
+
+<details><summary>Error: Library not loaded: '/usr/local/opt/libomp/lib/libomp.dylib'</summary>
+
+This error is resolved by installing libomp from Homebrew:
+
+```console
+brew install libomp
+```
 
 </details>

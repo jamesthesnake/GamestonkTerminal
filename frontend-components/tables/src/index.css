@@ -6,7 +6,7 @@
 
 @layer components {
   ._input {
-    @apply w-full text-xs px-2 py-1 bg-grey-900 h-[36px] border-[1.5px] border-grey-700 rounded  text-white focus:text-white focus:border-white active:border-white focus:ring-0 hover:border-white disabled:border-grey-600 font-normal;
+    @apply w-full text-xs px-2 py-1 bg-grey-50 dark:bg-grey-900 h-[36px] border-[1.5px] border-grey-300 dark:border-grey-700 rounded outline-none dark:outline-1 focus:border-grey-500 active:border-grey-500 dark:text-white dark:focus:text-white dark:focus:border-white dark:active:border-white dark:hover:border-white disabled:border-grey-600 font-normal;
   }
   ._btn-common {
     @apply whitespace-nowrap inline-flex w-full items-center justify-center gap-2 rounded py-2 px-6 text-center !no-underline transition duration-150 ease-out md:w-fit;
@@ -26,6 +26,18 @@
   ._hyper-link {
     @apply underline text-blue-300 hover:text-blue-400 active:text-blue-500 disabled:text-grey-600;
   }
+  ._modal {
+    @apply card fixed top-1/2 left-1/2 z-50 max-h-[608px] w-[90%] max-w-[568px] -translate-x-1/2 -translate-y-1/2 overflow-auto text-white bg-grey-900 p-2 duration-300 focus:outline-none md:p-10;
+  }
+  ._modal-overlay {
+    @apply bg-grey-900 opacity-60 z-40 inset-0 fixed;
+  }
+  ._modal-title {
+    @apply text-white uppercase tracking-widest text-lg font-bold;
+  }
+  .card {
+    @apply w-full rounded border border-grey-600 p-6 shadow bg-grey-850;
+  }
 }
 
 ._header {
@@ -43,7 +55,6 @@
 
 body {
   font-family: "Fira Code", monospace;
-  background-color: black;
 }
 
 /*table tbody {
@@ -83,4 +94,34 @@ tr {
   *:hover > .resizer {
     opacity: 1;
   }
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+  width: 20px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #d6dee1;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #a8bbbf;
+}
+
+::-webkit-scrollbar-corner {
+  background: rgba(0, 0, 0, 0);
+}
+
+table thead th {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
 }

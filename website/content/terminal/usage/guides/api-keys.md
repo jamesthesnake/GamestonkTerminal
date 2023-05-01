@@ -1,9 +1,13 @@
 ---
 title: Settings & API Keys
 sidebar_position: 1
-description: API (Application Programming Interface) keys are access credentials for accessing data from a particular source. They are a string of random characters assigned, by the data provider, to an individual account. Most vendors offer a free tier requiring only a valid email address. Each key is entered into the Terminal from the `/keys` menu, using the syntax described below. The `--help` dialogue for each source will also display the expected inputs.
-keywords: [api, keys, api keys, data provider, data, free, alpha vantage, fred, iex, twitter, degiro, binance, coinglass, polygon, intrinio, openbb terminal]
+description: API (Application Programming Interface) keys are access credentials for accessing data from a particular source. Learn how to set, manage, and access data APIs for the OpenBB Terminal.
+keywords: [api, keys, api keys, openbb terminal, data provider, data, free, alpha vantage, fred, iex, twitter, degiro, binance, coinglass, polygon, intrinio, sdk, alphavantage, bitquery, coinbase, databento, finnhub, FRED, github, glassnode, iex cloud, news API, robinhood, santiment, shroomdk, token terminal, tradier, twitter, whale alert]
 ---
+
+import HeadTitle from '@site/src/components/General/HeadTitle.tsx';
+
+<HeadTitle title="Settings & API Keys - Terminal | OpenBB Docs" />
 
 API (Application Programming Interface) keys are access credentials for obtaining data from a particular source. They are a string of random characters assigned, by the data provider, to an individual account. Most vendors offer a free tier requiring only a valid email address, some will require an account with proper KYC (Know Your Customer). Each source is entered into the Terminal from the `/keys` menu with the syntax as described in the sections below. Adding the `-h` argument to the command will also display the expected inputs. For example,
 
@@ -791,6 +795,25 @@ Click on, "Open Account", to start the sign-up process. After the account has be
 <summary>Upcoming changes to the Twitter API will deprecate the current functionality, it is uncertain if the current features will continue to work. </summary>
 
 ![Twitter API](https://pbs.twimg.com/media/FooIJF3agAIU8SN?format=png&name=medium)
+
+</details>
+
+### Ultima Insights
+
+> Ultima Insights' News Monitor is a platform that harnesses the power of GPT + LLMs to help deliver better, more relevant news to investors. We help find the news & tell you why it's important before it's on the front page of Bloomberg.
+
+<details>
+<summary>Instructions</summary>
+
+Go to: https://ultimainsights.ai/
+
+![Ultima Insights](https://user-images.githubusercontent.com/1911913/229215125-e3419788-eef3-4389-a3bd-5c08f3333347.png)
+
+Click on, "Get Started", to start the sign-up process. After the account has been setup, navigate to [Generate API Key](https://beta.ultimainsights.ai/my-account/generate-api-key) and click "Generate Key". Copy the API key to the clipboard, and enter this key into the OpenBB Terminal with:
+
+```console
+/keys/ultima REPLACE_WITH_KEY
+```
 
 </details>
 

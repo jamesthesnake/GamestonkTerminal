@@ -10,17 +10,18 @@ import webbrowser
 
 # IMPORTATION STANDARD
 from contextlib import contextmanager
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import matplotlib.pyplot as plt
 
 # IMPORTATION THIRDPARTY
 from packaging import version
 
-from openbb_terminal import thought_of_the_day as thought
-
 # IMPORTATION INTERNAL
-from openbb_terminal.core.config.paths import SETTINGS_ENV_FILE
+import openbb_terminal.core.session.local_model as Local
+from openbb_terminal import thought_of_the_day as thought
+from openbb_terminal.base_helpers import load_env_files
+from openbb_terminal.core.config.paths import HIST_FILE_PATH, SETTINGS_ENV_FILE
 from openbb_terminal.core.plots.backend import plots_backend
 from openbb_terminal.core.session.constants import REGISTER_URL
 from openbb_terminal.core.session.current_system import get_current_system
@@ -69,7 +70,7 @@ def print_goodbye():
 
     console.print(
         "Join us           : [cmds]https://openbb.co/discord[/cmds]\n"
-        "Follow us         : [cmds]https://twitter.com/openbb_finance[/cmds]\n"
+        "Follow us         : [cmds]https://openbb.co/twitter[/cmds]\n"
         "Ask support       : [cmds]https://openbb.co/support[/cmds]\n"
         "Request a feature : [cmds]https://openbb.co/request-a-feature[/cmds]\n"
     )
@@ -129,7 +130,10 @@ def update_terminal():
 
 
 def open_openbb_documentation(
-    path, url="https://my.openbb.dev/app/terminal", command=None, arg_type=""
+    path,
+    url="https://my.openbb.co/app/terminal",
+    command=None,
+    arg_type="",
 ):
     """Opens the documentation page based on your current location within the terminal. Make exceptions for menus
     that are considered 'common' by adjusting the path accordingly."""
@@ -157,7 +161,7 @@ def open_openbb_documentation(
                 path = "/usage?path=/usage/guides/customizing-the-terminal"
                 command = ""
             else:
-                path = f"/reference?path={path}"
+                path = f"/commands?path={path}"
         elif arg_type == "menu":  # user passed a menu name
             if command in ["ta", "ba", "qa"]:
                 menu = path.split("/")[-2]
@@ -201,7 +205,7 @@ def open_openbb_documentation(
             "news",
             "account",
         ]:
-            path = "/usage"
+            path = "/guides"
             command = ""
         elif command in ["ta", "ba", "qa"]:
             path = f"/usage?path=/usage/intros/common/{command}"
@@ -244,15 +248,16 @@ def is_auth_enabled() -> bool:
         If authentication is enabled
     """
     # TODO: This function is a temporary way to block authentication
-    return str(os.getenv("OPENBB_ENABLE_AUTHENTICATION")).lower() == "true"
+    return get_current_system().ENABLE_AUTHENTICATION
 
 
 def print_guest_block_msg():
     """Block guest users from using the terminal."""
     if is_local():
         console.print(
-            "[info]You are currently logged as a guest.\n"
-            f"[info]Register: [/info][cmds]{REGISTER_URL}\n[/cmds]"
+            "[info]You are currently logged as a guest.[/info]\n"
+            "[info]Login to use this feature.[/info]\n\n"
+            f"[info]If you don't have an account, you can create one here: [/info][cmds]{REGISTER_URL}\n[/cmds]"
         )
 
 
@@ -357,25 +362,45 @@ def welcome_message():
 
 
 def reset(queue: Optional[List[str]] = None):
-    """Resets the terminal.  Allows for checking code or keys without quitting"""
+    """Resets the terminal.  Allows for checking code without quitting"""
     console.print("resetting...")
     logger.info("resetting")
     plt.close("all")
     plots_backend().close(reset=True)
-    debug = os.environ.get("DEBUG_MODE", "False").lower() == "true"
+    debug = get_current_system().DEBUG_MODE
+    load_env_files()
 
-    # we clear all openbb_terminal modules from sys.modules
     try:
+        # save the current user
+        user_profile = get_current_user().profile
+        session: Dict[str, str] = {
+            "access_token": user_profile.token,
+            "token_type": user_profile.token_type,
+            "uuid": user_profile.uuid,
+        }
+
+        # remove the hub routines
+        if not is_local():
+            Local.remove(get_current_user().preferences.USER_ROUTINES_DIRECTORY / "hub")
+            if not get_current_user().profile.remember:
+                Local.remove(HIST_FILE_PATH)
+
+        # we clear all openbb_terminal modules from sys.modules
         for module in list(sys.modules.keys()):
             parts = module.split(".")
             if parts[0] == "openbb_terminal":
                 del sys.modules[module]
 
         # pylint: disable=import-outside-toplevel
-        from openbb_terminal.terminal_controller import main
-
         # we run the terminal again
-        main(debug, ["/".join(queue) if len(queue) > 0 else ""], module="")  # type: ignore
+        if is_local():
+            from openbb_terminal.terminal_controller import main
+
+            main(debug, ["/".join(queue) if len(queue) > 0 else ""], module="")  # type: ignore
+        else:
+            from openbb_terminal.core.session import session_controller
+
+            session_controller.main(session)
 
     except Exception as e:
         logger.exception("Exception: %s", str(e))

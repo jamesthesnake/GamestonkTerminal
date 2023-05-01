@@ -1,7 +1,7 @@
 ---
 title: Installation and Updates
 sidebar_position: 1
-description: Installation and Updates.
+description: Installation and Updates to the OpenBB SDK.
 keywords:
   [
     installation,
@@ -16,9 +16,20 @@ keywords:
     macos,
     how to,
     explanation,
-    openbb terminal,
+    openbb sdk,
+    pypi,
+    miniconda,
+    library,
+    C++,
+    library,
+    error
   ]
 ---
+
+import HeadTitle from '@site/src/components/General/HeadTitle.tsx';
+
+<HeadTitle title="Installation and Updates - SDK | OpenBB Docs" />
+
 ## Installation and Updates
 
 <details><summary>Do I have to use Miniconda?</summary>
@@ -90,5 +101,15 @@ softwareupdate --install-rosetta
 <details><summary>Miniconda3 will not install on ARM/Linux Raspberry Pi machines.</summary>
 
 Refer to this issue on the Conda [GitHub](https://github.com/conda/conda/issues/10723) page.
+
+</details>
+
+<details><summary>Error: Library not loaded: '/usr/local/opt/libomp/lib/libomp.dylib'</summary>
+
+This error is resolved by installing libomp from Homebrew:
+
+```console
+brew install libomp
+```
 
 </details>

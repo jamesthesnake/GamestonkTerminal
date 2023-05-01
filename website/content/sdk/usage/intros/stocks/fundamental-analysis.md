@@ -1,8 +1,12 @@
 ---
 title: Fundamental Analysis
-keywords: [fundamentals, fundamental, fa, ratios, earnings, balance, income, cash, statement, statements, sec, multiples, price, ebitda, ebitdam, revenue, quarter, annual, change, company, performance, filing, filings, 10K, 8K, audit, audited, due diligence, research, company, ticker, analyst, rating, rot, pt, est, sec, supplier, customer, arktrades, ratings, analysts, filings, form, forms, customers, suppliers]
+keywords: [fundamentals, fundamental, fa, ratios, earnings, balance, income, cash, statement, statements, sec, multiples, price, ebitda, ebitdam, revenue, quarter, annual, change, company, performance, filing, filings, 10K, 8K, audit, audited, due diligence, research, company, ticker, analyst, rating, rot, pt, est, sec, supplier, customer, arktrades, ratings, analysts, filings, form, forms, customers, suppliers, alphavantage, EODHD, financial modeling prep, polygon, how to, usage, examples, sdk]
 description: This guide introduces the Fundamental Analysis menu within the Stocks menu, briefly explains the features, and provides examples in context.
 ---
+
+import HeadTitle from '@site/src/components/General/HeadTitle.tsx';
+
+<HeadTitle title="Fundamental Analysis - SDK | OpenBB Docs" />
 
 The FA module provides programmatic access to the commands from within the OpenBB Terminal. To get the most out of these functions, we recommend obtaining API keys from:
 
@@ -11,7 +15,7 @@ The FA module provides programmatic access to the commands from within the OpenB
 - Financial Modeling Prep
 - Polygon
 
-View [this page](https://docs.openbb.co/terminal/quickstart/api-keys) for a list of all API sources used across the platform.
+View [this page](https://docs.openbb.co/terminal/usage/guides/api-keys) for a list of all API sources used across the platform.
 
 ## How to Use
 
